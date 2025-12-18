@@ -20,17 +20,13 @@ jobs:
 
       - name: Import trusted keys
         run: |
-          # GPG keys
-          if [ -s .github/trusted-keys/gpg.asc ]; then
-            gpg --import .github/trusted-keys/gpg.asc
-          fi
+          # GPG
+          gpg --import .github/trusted-keys/gpg.asc
 
-          # SSH keys
-          if [ -s .github/trusted-keys/ssh.txt ]; then
-            mkdir -p ~/.ssh
-            cp .github/trusted-keys/ssh.txt ~/.ssh/allowed_signers
-            chmod 600 ~/.ssh/allowed_signers
-          fi
+          # SSH
+          mkdir -p ~/.ssh
+          cp .github/trusted-keys/ssh.txt ~/.ssh/allowed_signers
+          chmod 600 ~/.ssh/allowed_signers
 
       - name: Verify release tag
         id: verify_tag
