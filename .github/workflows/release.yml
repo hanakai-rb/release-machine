@@ -1,0 +1,56 @@
+name: Release Gem
+
+on:
+  repository_dispatch:
+    types: [release]
+
+jobs:
+  release:
+    permissions:
+      id-token: write # For OIDC authentication
+      contents: read
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          repository: ${{github.event.client_payload.repo}}
+          ref: refs/tags/${{github.event.client_payload.tag}}
+
+      - name: Import trusted keys
+        run: |
+          # GPG keys
+          if [ -s .github/trusted-keys/gpg.asc ]; then
+            gpg --import .github/trusted-keys/gpg.asc
+          fi
+
+          # SSH keys
+          if [ -s .github/trusted-keys/ssh.txt ]; then
+            mkdir -p ~/.ssh
+            cp .github/trusted-keys/ssh.txt ~/.ssh/allowed_signers
+            chmod 600 ~/.ssh/allowed_signers
+          fi
+
+      - name: Verify release tag
+        id: verify_tag
+        run: |
+          # Fails if the tag is not signed by one of our trusted keys
+          git tag -v "${{ github.event.client_payload.tag }}"
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4
+
+      - name: Publish gem
+        uses: rubygems/release-gem@v1
+
+      - name: Annotate workflow
+        run: |
+          TAG="${{ github.event.client_payload.tag }}"
+          TAGGER=$(git for-each-ref --format='%(taggername)' "refs/tags/$TAG")
+          if [ -z "$TAGGER" ]; then
+            TAGGER=$(git log -1 --pretty=format:'%an' "$TAG")
+          fi
+          echo "### Tag created by: $TAGGER" >> $GITHUB_STEP_SUMMARY

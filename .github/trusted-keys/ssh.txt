@@ -1,0 +1,14 @@
+# SSH public keys for trusted releasers.
+#
+# Only tags signed by one of these keys (or the GPG keys in gpg.asc) will be accepted for release.
+#
+# Format: [namespace],[public key] [github-username]
+#
+# Example:
+# github.com,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB... timriley
+# github.com,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC... flash-gordon
+# github.com,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID... cllns
+#
+# Add one line per authorized SSH key, with the GitHub username at the end.
+
+github.com,ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJVeJ3lQW5izwzDWUCoZMlnDTv9FahsJoHVlpQvpqxZe timriley
