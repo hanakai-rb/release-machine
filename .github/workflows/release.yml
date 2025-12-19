@@ -58,6 +58,9 @@ jobs:
         with:
           ruby-version: 3.4
 
+      - name: Bundle
+        run: bundle install
+
       - name: Publish gem
         uses: rubygems/release-gem@v1
 
