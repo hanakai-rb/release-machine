@@ -1,8 +1,16 @@
 name: Release Gem
 
 on:
-  repository_dispatch:
-    types: [release]
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Repository to release (e.g., owner/repo)"
+        required: true
+        type: string
+      tag:
+        description: "Tag to release (e.g., v1.0.0)"
+        required: true
+        type: string
 
 jobs:
   release:
@@ -15,8 +23,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v6
         with:
-          repository: ${{github.event.client_payload.repo}}
-          ref: refs/tags/${{github.event.client_payload.tag}}
+          repository: ${{github.event.inputs.repo}}
+          ref: refs/tags/${{github.event.inputs.tag}}
 
       - name: Import trusted keys
         run: |
@@ -32,7 +40,7 @@ jobs:
         id: verify_tag
         run: |
           # Fails if the tag is not signed by one of our trusted keys
-          git tag -v "${{ github.event.client_payload.tag }}"
+          git tag -v "${{ github.event.inputs.tag }}"
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -44,7 +52,7 @@ jobs:
 
       - name: Annotate workflow
         run: |
-          TAG="${{ github.event.client_payload.tag }}"
+          TAG="${{ github.event.inputs.tag }}"
           TAGGER=$(git for-each-ref --format='%(taggername)' "refs/tags/$TAG")
           if [ -z "$TAGGER" ]; then
             TAGGER=$(git log -1 --pretty=format:'%an' "$TAG")
