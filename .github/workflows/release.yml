@@ -46,11 +46,9 @@ jobs:
         with:
           repository: ${{github.event.inputs.repo}}
           ref: refs/tags/${{github.event.inputs.tag}}
-          path: target-repo
 
       - name: Verify release tag
         id: verify_tag
-        working-directory: target-repo
         run: |
           # Fails if the tag is not signed by one of our trusted keys
           git tag -v "${{ github.event.inputs.tag }}"
@@ -59,15 +57,11 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.4
-          working-directory: target-repo
 
       - name: Publish gem
         uses: rubygems/release-gem@v1
-        with:
-          working-directory: target-repo
 
       - name: Annotate workflow
-        working-directory: target-repo
         run: |
           TAG="${{ github.event.inputs.tag }}"
           TAGGER=$(git for-each-ref --format='%(taggername)' "refs/tags/$TAG")
