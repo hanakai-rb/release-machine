@@ -34,7 +34,7 @@ jobs:
 
           # SSH
           mkdir -p ~/.ssh
-          cp release-machine/.github/trusted-keys/ssh.txt ~/.ssh/allowed_signers
+          grep -v '^#' release-machine/.github/trusted-keys/ssh.txt | grep -v '^$' > ~/.ssh/allowed_signers
           chmod 600 ~/.ssh/allowed_signers
           git config --global gpg.ssh.allowedSignersFile ~/.ssh/allowed_signers
 
