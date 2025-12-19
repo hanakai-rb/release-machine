@@ -28,7 +28,9 @@ jobs:
       - name: Import trusted keys
         run: |
           # GPG
-          gpg --import release-machine/.github/trusted-keys/gpg.asc
+          if grep -q "^-----BEGIN" release-machine/.github/trusted-keys/gpg.asc; then
+            gpg --import release-machine/.github/trusted-keys/gpg.asc
+          fi
 
           # SSH
           mkdir -p ~/.ssh
