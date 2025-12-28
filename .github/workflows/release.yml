@@ -25,32 +25,83 @@ jobs:
         with:
           path: release-machine
 
-      - name: Import trusted keys
-        run: |
-          # GPG
-          if grep -q "^-----BEGIN" release-machine/.github/trusted-keys/gpg.asc; then
-            gpg --import release-machine/.github/trusted-keys/gpg.asc
-          fi
-
-          # SSH
-          mkdir -p ~/.ssh
-          grep -v '^#' release-machine/.github/trusted-keys/ssh.txt | grep -v '^$' > ~/.ssh/allowed_signers
-          chmod 600 ~/.ssh/allowed_signers
-          git config --global gpg.ssh.allowedSignersFile ~/.ssh/allowed_signers
-
-          # Cleanup
-          rm -rf release-machine
-
       - name: Checkout repo to release
         uses: actions/checkout@v6
         with:
           repository: ${{github.event.inputs.repo}}
           ref: refs/tags/${{github.event.inputs.tag}}
 
+      - name: Extract gem name
+        id: extract_gem_name
+        run: |
+          # Find the .gemspec file
+          GEMSPEC=$(find . -maxdepth 1 -name "*.gemspec" -type f | head -1)
+
+          if [ -z "$GEMSPEC" ]; then
+            echo "ERROR: No .gemspec file found in repository"
+            exit 1
+          fi
+
+          # Extract gem name from gemspec filename ("hanami-router.gemspec" -> "hanami-router")
+          GEM_NAME=$(basename "$GEMSPEC" .gemspec)
+
+          if [ -z "$GEM_NAME" ]; then
+            echo "ERROR: Could not extract gem name from $GEMSPEC"
+            exit 1
+          fi
+
+          echo "gem_name=$GEM_NAME" >> $GITHUB_OUTPUT
+
+      - name: Prepare authorized releaser keys
+        env:
+          GEM_NAME: ${{ steps.extract_gem_name.outputs.gem_name }}
+        run: |
+          set -e
+
+          RELEASERS_YML="release-machine/releasers.yml"
+          RELEASER_KEYS_DIR="release-machine/releasers"
+
+          # Get releasers for gem (default releasers + gem-specific releasers)
+          RELEASERS=$(
+            {
+              yq eval '.default[]' "$RELEASERS_YML" 2>/dev/null
+              yq eval ".gems.\"$GEM_NAME\"[]" "$RELEASERS_YML" 2>/dev/null
+            } | sort -u
+          )
+          if [ -z "$RELEASERS" ]; then
+            echo "ERROR: No releasers for '$GEM_NAME'"
+            exit 1
+          fi
+
+          # Build GPG keyring for releasers
+          while read -r username; do
+            GPG_FILE="$RELEASER_KEYS_DIR/${username}.gpg.asc"
+            if [ -f "$GPG_FILE" ] && grep -q "^-----BEGIN" "$GPG_FILE"; then
+              gpg --import "$GPG_FILE" 2>/dev/null || true
+            fi
+          done <<< "$RELEASERS"
+
+          # Build SSH allowed signers for releaser keys
+          mkdir -p ~/.ssh
+          touch ~/.ssh/allowed_signers
+
+          while read -r username; do
+            SSH_FILE="$RELEASER_KEYS_DIR/${username}.ssh.txt"
+            if [ -f "$SSH_FILE" ]; then
+              grep -v '^#' "$SSH_FILE" | grep -v '^$' >> ~/.ssh/allowed_signers || true
+            fi
+          done <<< "$RELEASERS"
+
+          chmod 600 ~/.ssh/allowed_signers
+          git config --global gpg.ssh.allowedSignersFile ~/.ssh/allowed_signers
+
+          # Clean up
+          rm -rf release-machine
+
       - name: Verify release tag
         id: verify_tag
         run: |
-          # Fails if the tag is not signed by one of our trusted keys
+          # Fails if the tag is not signed by one of our authorized keys
           git tag -v "${{ github.event.inputs.tag }}"
 
       - name: Set up Ruby
@@ -63,6 +114,8 @@ jobs:
 
       - name: Publish gem
         uses: rubygems/release-gem@v1
+        with:
+          attestations: false
 
       - name: Annotate workflow
         run: |
