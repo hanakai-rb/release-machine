@@ -8,7 +8,12 @@ A central GitHub Actions workflow to release Hanakai gems using signed version t
 
 ## How to release a gem
 
-You should be an [authorized releaser](releasers.yml) for the gem and your git should be signing commits using [the key you've provided here](releasers/). Then:
+Prerequisites:
+
+- You are an [authorized releaser](releasers.yml) for the gem.
+- Your git is signing commits using your key [configured here](releasers/).
+
+To release a gem:
 
 1. Prepare `lib/[gem_name]/version.rb` and `CHANGELOG.md` for the new version.
 2. Create a signed tag for the version: `get tag -s vX.Y.Z`
