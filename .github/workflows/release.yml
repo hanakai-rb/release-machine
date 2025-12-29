@@ -16,7 +16,7 @@ jobs:
   release:
     permissions:
       id-token: write # For OIDC authentication
-      contents: read
+      contents: write
 
     runs-on: ubuntu-latest
     steps:
@@ -97,9 +97,6 @@ jobs:
           chmod 600 ~/.ssh/allowed_signers
           git config --global gpg.ssh.allowedSignersFile ~/.ssh/allowed_signers
 
-          # Clean up
-          rm -rf release-machine
-
       - name: Verify release tag
         id: verify_tag
         working-directory: release-gem
@@ -131,6 +128,7 @@ jobs:
           gem await "${GEM_NAME}"-*.gem
 
       - name: Annotate workflow
+        id: annotate
         working-directory: release-gem
         run: |
           TAG="${{ github.event.inputs.tag }}"
@@ -139,3 +137,29 @@ jobs:
             TAGGER=$(git log -1 --pretty=format:'%an' "$TAG")
           fi
           echo "### Tag created by: $TAGGER" >> $GITHUB_STEP_SUMMARY
+          echo "tagger=$TAGGER" >> $GITHUB_OUTPUT
+
+      - name: Update release history
+        working-directory: release-machine
+        run: |
+          # Extract tagger email from the release tag
+          pushd ../release-gem > /dev/null
+          TAGGER_EMAIL=$(git for-each-ref --format='%(taggeremail)' "refs/tags/${{ github.event.inputs.tag }}" | tr -d '<>')
+          if [ -z "$TAGGER_EMAIL" ]; then
+            TAGGER_EMAIL=$(git log -1 --pretty=format:'%ae' "${{ github.event.inputs.tag }}")
+          fi
+          popd > /dev/null
+
+          # Add release entry
+          ./.github/scripts/add-release.sh \
+            "${{ steps.gem_name.outputs.gem_name }}" \
+            "${{ github.event.inputs.tag }}" \
+            "$TAGGER_EMAIL" \
+            "${{ github.token }}"
+
+          # Commit and push
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add RELEASES.md
+          git commit -m "Add release: ${{ steps.gem_name.outputs.gem_name }} ${{ github.event.inputs.tag }}"
+          git push
