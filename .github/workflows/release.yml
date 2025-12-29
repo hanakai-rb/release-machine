@@ -30,12 +30,13 @@ jobs:
         with:
           repository: ${{github.event.inputs.repo}}
           ref: refs/tags/${{github.event.inputs.tag}}
+          path: release-gem
 
       - name: Extract gem name
-        id: extract_gem_name
+        id: gem_name
         run: |
           # Find the .gemspec file
-          GEMSPEC=$(find . -maxdepth 1 -name "*.gemspec" -type f | head -1)
+          GEMSPEC=$(find release-gem -maxdepth 1 -name "*.gemspec" -type f | head -1)
 
           if [ -z "$GEMSPEC" ]; then
             echo "ERROR: No .gemspec file found in repository"
@@ -54,7 +55,7 @@ jobs:
 
       - name: Prepare authorized releaser keys
         env:
-          GEM_NAME: ${{ steps.extract_gem_name.outputs.gem_name }}
+          GEM_NAME: ${{ steps.gem_name.outputs.gem_name }}
         run: |
           set -e
 
@@ -68,8 +69,9 @@ jobs:
               yq eval ".gems.\"$GEM_NAME\"[]" "$RELEASERS_YML" 2>/dev/null
             } | sort -u
           )
+
           if [ -z "$RELEASERS" ]; then
-            echo "ERROR: No releasers for '$GEM_NAME'"
+            echo "ERROR: No releasers configured for '$GEM_NAME'"
             exit 1
           fi
 
@@ -100,6 +102,7 @@ jobs:
 
       - name: Verify release tag
         id: verify_tag
+        working-directory: release-gem
         run: |
           # Fails if the tag is not signed by one of our authorized keys
           git tag -v "${{ github.event.inputs.tag }}"
@@ -109,15 +112,26 @@ jobs:
         with:
           ruby-version: 3.4
 
-      - name: Bundle
-        run: bundle install
+      - uses: rubygems/configure-rubygems-credentials@v1.0.0
 
       - name: Publish gem
-        uses: rubygems/release-gem@v1
-        with:
-          attestations: false
+        working-directory: release-gem
+        env:
+          GEM_NAME: ${{ steps.gem_name.outputs.gem_name }}
+        run: |
+          gem build "${GEM_NAME}.gemspec"
+          gem push "${GEM_NAME}"-*.gem
+
+      - name: Wait for release
+        working-directory: release-gem
+        env:
+          GEM_NAME: ${{ steps.gem_name.outputs.gem_name }}
+        run: |
+          gem install rubygems-await
+          gem await "${GEM_NAME}"-*.gem
 
       - name: Annotate workflow
+        working-directory: release-gem
         run: |
           TAG="${{ github.event.inputs.tag }}"
           TAGGER=$(git for-each-ref --format='%(taggername)' "refs/tags/$TAG")
