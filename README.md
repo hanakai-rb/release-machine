@@ -1,8 +1,32 @@
 # 💿 Hanakai Release Machine
 
+[latest-releases]: https://github.com/hanakai-rb/release-machine/actions/workflows/release.yml
+
 A central GitHub Actions workflow to release Hanakai gems using signed version tags.
 
-## Config
+**[See latest releases][latest-releases]**.
+
+## How to release a gem
+
+You should be an [authorized releaser](releasers.yml) for the gem and your git should be signing commits using [the key you've provided here](releasers/). Then:
+
+1. Prepare `lib/[gem_name]/version.rb` and `CHANGELOG.md` for the new version.
+2. Create a signed tag for the version: `get tag -s vX.Y.Z`
+3. Push the signed tag: `git push origin vX.Y.Z`
+4. Watch the latest [release workflow run][latest-releases] to see the new version published.
+
+You can also use the [gem-release gem](https://github.com/svenfuchs/gem-release) to streamline steps 1-3:
+
+```
+$ gem install gem-release
+$ gem bump --version X.Y.Z --tag --sign --push
+```
+
+Check out `gem bump --help` to learn more.
+
+## Configuring release machine
+
+See [`.github/workflows/release.yml`](.github/workflows/release.yml) for the release workflow.
 
 ### [`releasers/`](releasers/)
 
