@@ -127,6 +127,14 @@ jobs:
           gem install rubygems-await
           gem await "${GEM_NAME}"-*.gem
 
+      - name: Create GitHub release
+        working-directory: release-gem
+        run: |
+          ruby ../release-machine/.github/scripts/create-github-release.rb \
+            "${{ github.event.inputs.repo }}" \
+            "${{ github.event.inputs.tag }}" \
+            "${{ secrets.CREATE_GITHUB_RELEASE_TOKEN }}"
+
       - name: Annotate workflow
         id: annotate
         working-directory: release-gem
