@@ -1,0 +1,15 @@
+# Authorized releasers
+#
+# This config maps gem names to GitHub usernames of authorized releasers. Each releaser must have
+# a corresponding key file in `releasers/`.
+
+# Default releasers can release all gems.
+default:
+  - timriley
+  - cllns
+  - flash-gordon
+
+# Gem releasers can release specific gems.
+#
+# Entries here are added to the default releasers.
+gems: {}

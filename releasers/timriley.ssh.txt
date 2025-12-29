@@ -1,0 +1,4 @@
+# Format: [principal] [key-type] [public-key]
+# The principal should match the email used in git config.
+
+tim@riley.id.au ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJVeJ3lQW5izwzDWUCoZMlnDTv9FahsJoHVlpQvpqxZe
