@@ -47,7 +47,7 @@ begin
         previous_version = $1
 
         if !previous_version.to_s.empty?
-          comparison_link = "\n[Compare v#{previous_version}...v#{version}][#{version}]"
+          comparison_link = "\n[Compare v#{previous_version} ... v#{version}][#{version}]"
           changelog_body += comparison_link
         end
       end
