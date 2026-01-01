@@ -12,6 +12,11 @@ on:
         description: "Tag to release (e.g., v1.0.0)"
         required: true
         type: string
+      announce:
+        description: "Trigger release announcements"
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   release:
@@ -174,3 +179,20 @@ jobs:
           git add RELEASES.md
           git commit -m "Add release: ${{ steps.gem_name.outputs.gem_name }} ${{ github.event.inputs.tag }}"
           git push
+
+      - name: Trigger announcements
+        if: github.event.inputs.announce == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: "announce.yml",
+              ref: "main",
+              inputs: {
+                repo: "${{ github.event.inputs.repo }}",
+                tag: "${{ github.event.inputs.tag }}",
+                gem_name: "${{ steps.gem_name.outputs.gem_name }}"
+              }
+            });

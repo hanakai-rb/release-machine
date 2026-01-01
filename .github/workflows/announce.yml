@@ -1,0 +1,65 @@
+name: Announce release
+run-name: Announce ${{ github.event.inputs.repo }} ${{ github.event.inputs.tag }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Repository that was released (e.g., owner/repo)"
+        required: true
+        type: string
+      tag:
+        description: "Release tag (e.g., v1.0.0)"
+        required: true
+        type: string
+      gem_name:
+        description: "Gem name"
+        required: true
+        type: string
+
+jobs:
+  forum:
+    runs-on: ubuntu-latest
+    outputs:
+      forum_url: ${{ steps.post.outputs.url }}
+    env:
+      FORUM_URL: "https://discourse.hanamirb.org"
+      FORUM_CATEGORY_ID: "17"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4
+
+      - name: Post to forum
+        id: post
+        env:
+          FORUM_API_KEY: ${{ secrets.FORUM_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OUTPUT=$(
+            ruby .github/scripts/announce-to-forum.rb \
+            "${{ github.event.inputs.gem_name }}" \
+            "${{ github.event.inputs.repo }}" \
+            "${{ github.event.inputs.tag }}"
+          )
+          echo "$OUTPUT"
+
+          POST_URL=$(echo "$OUTPUT" | grep -oE 'https://discourse[^ ]+')
+          echo "url=$POST_URL" >> $GITHUB_OUTPUT
+
+  summary:
+    needs: forum
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Add to workflow summary
+        run: |
+          echo "### ${{ github.event.inputs.gem_name }} ${{ github.event.inputs.tag }} announcements" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.forum.result }}" == "success" ]; then
+            echo "- [Forum post](${{ needs.forum.outputs.forum_url }})" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Forum post failed" >> $GITHUB_STEP_SUMMARY
+          fi
