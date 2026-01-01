@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: add-release.sh <gem-name> <tag> <tagger-email> <github-token>
+# Usage: add-release.sh <gem-name> <tag> <tagger-email>
 #
 # Adds a release entry to RELEASES.md in the format:
 # - YYYY-MM-DD - gem-name vX.Y.Z by @username
+#
+# Requires GITHUB_TOKEN environment variable for API access.
 
 GEM_NAME="${1:?Gem name required}"
 TAG="${2:?Tag required}"
 TAGGER_EMAIL="${3:?Tagger email required}"
-GITHUB_TOKEN="${4:?GitHub token required}"
+GITHUB_TOKEN="${GITHUB_TOKEN:?GITHUB_TOKEN environment variable required}"
 
 [ -f RELEASES.md ] || { echo "ERROR: RELEASES.md not found"; exit 1; }
 

@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Usage: create-github-release.rb <repo> <release-tag> <github-token>
+# Usage: create-github-release.rb <repo> <release-tag>
 #
 # Creates a GitHub release entry for the given release tag, using content from the repo's
 # CHANGELOG.md.
+#
+# Requires GITHUB_TOKEN environment variable for API access.
 
 require "bundler/inline"
 
@@ -19,7 +21,7 @@ require "uri"
 
 repo = ARGV[0] or abort "ERROR: Repository required (e.g. dry-rb/dry-operation)"
 tag = ARGV[1] or abort "ERROR: Tag required (e.g. v1.0.0)"
-github_token = ARGV[2] or abort "ERROR: GitHub token required"
+github_token = ENV["GITHUB_TOKEN"] or abort "ERROR: GITHUB_TOKEN environment variable required"
 
 version = tag.sub(/^v/, "")
 is_prerelease = tag.include?("alpha") || tag.include?("beta") || tag.include?("rc")

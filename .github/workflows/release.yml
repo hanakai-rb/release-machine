@@ -130,11 +130,12 @@ jobs:
 
       - name: Create GitHub release
         working-directory: release-gem
+        env:
+          GITHUB_TOKEN: ${{ secrets.CREATE_GITHUB_RELEASE_TOKEN }}
         run: |
           ruby ../release-machine/.github/scripts/create-github-release.rb \
             "${{ github.event.inputs.repo }}" \
-            "${{ github.event.inputs.tag }}" \
-            "${{ secrets.CREATE_GITHUB_RELEASE_TOKEN }}"
+            "${{ github.event.inputs.tag }}"
 
       - name: Annotate workflow
         id: annotate
@@ -150,6 +151,8 @@ jobs:
 
       - name: Update release history
         working-directory: release-machine
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           # Extract tagger email from the release tag
           pushd ../release-gem > /dev/null
@@ -163,8 +166,7 @@ jobs:
           ./.github/scripts/add-release.sh \
             "${{ steps.gem_name.outputs.gem_name }}" \
             "${{ github.event.inputs.tag }}" \
-            "$TAGGER_EMAIL" \
-            "${{ github.token }}"
+            "$TAGGER_EMAIL"
 
           # Commit and push
           git config user.name "github-actions[bot]"
