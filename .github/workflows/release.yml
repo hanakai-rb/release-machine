@@ -23,6 +23,7 @@ jobs:
     permissions:
       id-token: write # For OIDC authentication
       contents: write
+      actions: write # For triggering announce workflow
 
     runs-on: ubuntu-latest
     steps:
