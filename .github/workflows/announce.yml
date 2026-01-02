@@ -49,12 +49,12 @@ jobs:
           POST_URL=$(echo "$OUTPUT" | grep -oE 'https://discourse[^ ]+')
           echo "url=$POST_URL" >> $GITHUB_OUTPUT
 
-  summary:
+  announcements:
     needs: forum
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Add to workflow summary
+      - name: Prepare summary
         run: |
           echo "### ${{ github.event.inputs.gem_name }} ${{ github.event.inputs.tag }} announcements" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
