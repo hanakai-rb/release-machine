@@ -30,6 +30,7 @@ jobs:
       - name: Checkout release-machine
         uses: actions/checkout@v6
         with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
           path: release-machine
 
       - name: Checkout repo to release
