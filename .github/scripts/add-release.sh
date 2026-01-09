@@ -33,7 +33,8 @@ NEW_ENTRY="- ${DATE} - ${GEM_NAME} ${TAG} by ${DISPLAY_USER}"
 
 # Insert before first list item, or append if none exist
 if grep -q "^- " RELEASES.md; then
-  sed -i "0,/^-/s/^-/$NEW_ENTRY"$'\n\n&/' RELEASES.md
+  # Use awk for portable insertion
+  awk -v entry="$NEW_ENTRY" 'BEGIN{done=0} /^-/ && !done {print entry; done=1} {print}' RELEASES.md > RELEASES.md.tmp && mv RELEASES.md.tmp RELEASES.md
 else
   echo "" >> RELEASES.md
   echo "$NEW_ENTRY" >> RELEASES.md
