@@ -1,0 +1,4 @@
+# Format: [principal] [key-type] [public-key]
+# The principal should match the email used in git config.
+
+sean@cllns.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHq9wYylrzLNbPDtqt39jOd8HrkBgk2Fpz4j5YRl+oQQ

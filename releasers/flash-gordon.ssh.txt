@@ -1,0 +1,4 @@
+# Format: [principal] [key-type] [public-key]
+# The principal should match the email used in git config.
+
+fg@flashgordon.ru ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQClve197HOddVuTJJiT/FzC3Pa5jnYyi4lr+P9vglEy4yNs/YykxrQpKJr/glMjkw9RaDrER4IV0brmTm91xOot4VQKPiT+qJG71XGh7f7GV6yiAKIu577H3h6wMK7zGKNo7cLdpJODskbDJaohPZ0UYACborAYi6k0jKZP7nV0P5OpKkcsWX32clOYxQJd2B+PYXMA7sxAD1oI9BW0vtDO7p1738KWB3/KJk5kVr9Pm6eQtXEWn0W7siaErssnZfhvKF2GnQbITeFsapxD7BElBBSzkFbe2HnON3Z6WCBm6Co1h9iSFFA0HCYBRZOFTw7OSHubII88DMsHJS1XUm8b
