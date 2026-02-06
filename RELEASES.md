@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-02-06 - dry-types v1.9.1 by @timriley
 - 2026-02-06 - dry-operation v1.1.0 by @timriley
 - 2026-02-06 - hanami-cli v2.3.5 by @timriley
 - 2026-01-23 - hanami-cli v2.3.4 by @timriley
