@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-03-03 - dry-schema v1.16.0 by @timriley
 - 2026-03-03 - dry-struct v1.8.1 by @timriley
 - 2026-02-06 - dry-types v1.9.1 by @timriley
 - 2026-02-06 - dry-operation v1.1.0 by @timriley
