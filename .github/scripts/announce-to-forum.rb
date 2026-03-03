@@ -67,7 +67,7 @@ CLOSING_PARENS_REGEXP = /
   \(       # opening paren
   ([^)]+)  # capture: content inside parentheses
   \)       # closing paren
-  \s*      # optional trailing whitespace
+  [ \t]*   # match but don't capture trailing spaces or tabs (not newlines)
   $        # end of line
 /x
 
