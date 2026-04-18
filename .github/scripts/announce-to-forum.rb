@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Usage: announce-to-forum.rb <gem-name> <repo> <tag>
+# Usage: announce-to-forum.rb <package-name> <repo> <tag>
 #
 # Fetches a GitHub release and posts an announcement to Discourse forum.
 #
 # Arguments:
-#   gem-name - Name of the gem being released
-#   repo     - GitHub repository in owner/repo format
-#   tag      - Release tag (e.g., v1.0.0)
+#   package-name - Name of the package being released
+#   repo         - GitHub repository in owner/repo format
+#   tag          - Release tag (e.g., v1.0.0)
 #
 # Required environment variables:
 #   FORUM_URL         - Discourse forum URL
@@ -26,7 +26,7 @@ end
 require "json"
 
 # Prepare input
-gem_name = ARGV[0] or abort "ERROR: Gem name required"
+package_name = ARGV[0] or abort "ERROR: Package name required"
 repo = ARGV[1] or abort "ERROR: Repository required (format: owner/repo)"
 tag = ARGV[2] or abort "ERROR: Release tag required"
 
@@ -101,7 +101,7 @@ release_body.gsub!(CLOSING_PARENS_REGEXP) do
 end
 
 # Prepare forum post
-title = "#{gem_name} #{version} released"
+title = "#{package_name} #{version} released"
 
 body = release_body.strip
 body += "\n\n---\n\n"
