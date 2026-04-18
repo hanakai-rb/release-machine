@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-04-18 - dry-testing v1.13.0 by @timriley
 - 2026-03-13 - dry-logger v1.2.2 by @timriley
 - 2026-03-03 - dry-schema v1.16.0 by @timriley
 - 2026-03-03 - dry-struct v1.8.1 by @timriley
