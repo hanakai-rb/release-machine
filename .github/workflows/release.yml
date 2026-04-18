@@ -119,15 +119,36 @@ jobs:
 
       - uses: rubygems/configure-rubygems-credentials@v1.0.0
 
-      - name: Publish gem
+      - name: Build gem
         working-directory: release-gem
         env:
           GEM_NAME: ${{ steps.gem_name.outputs.gem_name }}
-        run: |
-          gem build "${GEM_NAME}.gemspec"
-          gem push "${GEM_NAME}"-*.gem
+        run: gem build "${GEM_NAME}.gemspec"
 
-      - name: Wait for release
+      - name: Publish gem to RubyGems.org
+        working-directory: release-gem
+        env:
+          GEM_NAME: ${{ steps.gem_name.outputs.gem_name }}
+        run: gem push "${GEM_NAME}"-*.gem
+
+      - name: Publish gem to gem.coop
+        working-directory: release-gem
+        env:
+          GEM_NAME: ${{ steps.gem_name.outputs.gem_name }}
+          GEM_HOST_API_KEY: ${{ secrets.GEM_COOP_API_KEY }}
+        run: |
+          case "$GEM_NAME" in
+            dry-*)           NAMESPACE="@dry" ;;
+            hanami|hanami-*) NAMESPACE="@hanami" ;;
+            rom|rom-*)       NAMESPACE="@rom" ;;
+            *)
+              echo "WARNING: No gem.coop namespace found for '$GEM_NAME', skipping gem.coop publish"
+              exit 0
+              ;;
+          esac
+          gem push --host "https://beta.gem.coop/${NAMESPACE}" "${GEM_NAME}"-*.gem
+
+      - name: Wait for RubyGems.org release
         working-directory: release-gem
         env:
           GEM_NAME: ${{ steps.gem_name.outputs.gem_name }}
