@@ -1,0 +1,35 @@
+name: Publish GitHub release
+description: >-
+  Create a GitHub release entry for the given tag, populated from the target
+  repository's CHANGELOG.md. Installs Ruby internally (setup-ruby is idempotent
+  when the same version is already installed).
+
+inputs:
+  target-path:
+    description: Path where the target repo is checked out
+    required: true
+  repo:
+    description: GitHub repository of the released package (owner/repo)
+    required: true
+  tag:
+    description: Release tag (e.g., v1.0.0)
+    required: true
+  github-token:
+    description: Token with permission to create releases on the target repo
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.4
+
+    - shell: bash
+      working-directory: ${{ inputs.target-path }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        ruby "$GITHUB_WORKSPACE/.github/scripts/create-github-release.rb" \
+          "${{ inputs.repo }}" \
+          "${{ inputs.tag }}"
