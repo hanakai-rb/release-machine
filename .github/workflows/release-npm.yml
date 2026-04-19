@@ -1,0 +1,131 @@
+name: Release npm package
+run-name: Release ${{ github.event.inputs.repo }} ${{ github.event.inputs.tag }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Repository to release (e.g., owner/repo)"
+        required: true
+        type: string
+      tag:
+        description: "Tag to release (e.g., v1.0.0)"
+        required: true
+        type: string
+      announce:
+        description: "Trigger release announcements"
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  release:
+    permissions:
+      id-token: write # For npm trusted publishing and provenance attestations
+      contents: write
+      actions: write # For triggering announce workflow
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release-machine
+        uses: actions/checkout@v6
+        with:
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Checkout repo to release
+        uses: actions/checkout@v6
+        with:
+          repository: ${{github.event.inputs.repo}}
+          ref: refs/tags/${{github.event.inputs.tag}}
+          path: release-package
+
+      - name: Extract package name
+        id: package_name
+        run: |
+          PACKAGE_JSON="release-package/package.json"
+
+          if [ ! -f "$PACKAGE_JSON" ]; then
+            echo "ERROR: No package.json found in repository"
+            exit 1
+          fi
+
+          PACKAGE_NAME=$(jq -r '.name' "$PACKAGE_JSON")
+
+          if [ -z "$PACKAGE_NAME" ] || [ "$PACKAGE_NAME" = "null" ]; then
+            echo "ERROR: Could not extract package name from $PACKAGE_JSON"
+            exit 1
+          fi
+
+          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Authorize release
+        uses: ./.github/actions/authorize-release
+        with:
+          package-name: ${{ steps.package_name.outputs.package_name }}
+          target-path: release-package
+          tag: ${{ github.event.inputs.tag }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        working-directory: release-package
+        run: npm ci
+
+      - name: Publish package to npm
+        working-directory: release-package
+        run: npm publish --provenance --access public
+
+      - name: Wait for npm registry
+        env:
+          PACKAGE_NAME: ${{ steps.package_name.outputs.package_name }}
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          VERSION="${TAG#v}"
+          for i in {1..60}; do
+            if npm view "${PACKAGE_NAME}@${VERSION}" version >/dev/null 2>&1; then
+              echo "Package ${PACKAGE_NAME}@${VERSION} is available on npm"
+              exit 0
+            fi
+            echo "Waiting for ${PACKAGE_NAME}@${VERSION} on npm..."
+            sleep 5
+          done
+          echo "ERROR: Timed out waiting for npm registry"
+          exit 1
+
+      - name: Publish GitHub release
+        uses: ./.github/actions/publish-github-release
+        with:
+          target-path: release-package
+          repo: ${{ github.event.inputs.repo }}
+          tag: ${{ github.event.inputs.tag }}
+          github-token: ${{ secrets.CREATE_GITHUB_RELEASE_TOKEN }}
+
+      - name: Annotate workflow
+        working-directory: release-package
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          TAGGER=$(git for-each-ref --format='%(taggername)' "refs/tags/$TAG")
+          if [ -z "$TAGGER" ]; then
+            TAGGER=$(git log -1 --pretty=format:'%an' "$TAG")
+          fi
+          echo "### Tag created by: $TAGGER" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update release history
+        uses: ./.github/actions/update-release-history
+        with:
+          target-path: release-package
+          package-name: ${{ steps.package_name.outputs.package_name }}
+          tag: ${{ github.event.inputs.tag }}
+          github-token: ${{ github.token }}
+
+      - name: Trigger announcements
+        if: github.event.inputs.announce == 'true'
+        uses: ./.github/actions/trigger-announcements
+        with:
+          repo: ${{ github.event.inputs.repo }}
+          tag: ${{ github.event.inputs.tag }}
+          package-name: ${{ steps.package_name.outputs.package_name }}

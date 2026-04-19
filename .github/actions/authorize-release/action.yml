@@ -1,0 +1,70 @@
+name: Authorize release
+description: >-
+  Authorize a release by verifying its tag signature against the releasers listed
+  for the package in releasers.yml. Loads the authorized releasers' GPG and SSH
+  signing keys, then runs `git tag -v`. Fails if the tag is not signed by one of
+  the authorized releasers.
+
+inputs:
+  package-name:
+    description: Package name to look up in releasers.yml
+    required: true
+  target-path:
+    description: Path where the target repo is checked out
+    required: true
+  tag:
+    description: Release tag to verify (e.g., v1.0.0)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Load authorized releaser keys
+      shell: bash
+      env:
+        PACKAGE_NAME: ${{ inputs.package-name }}
+      run: |
+        set -e
+
+        RELEASERS_YML="releasers.yml"
+        RELEASER_KEYS_DIR="releasers"
+
+        # Default releasers + package-specific releasers
+        RELEASERS=$(
+          {
+            yq eval '.default[]' "$RELEASERS_YML" 2>/dev/null
+            yq eval ".packages.\"$PACKAGE_NAME\"[]" "$RELEASERS_YML" 2>/dev/null
+          } | sort -u
+        )
+
+        if [ -z "$RELEASERS" ]; then
+          echo "ERROR: No releasers configured for '$PACKAGE_NAME'"
+          exit 1
+        fi
+
+        # Import releaser GPG keys
+        while read -r username; do
+          GPG_FILE="$RELEASER_KEYS_DIR/${username}.gpg.asc"
+          if [ -f "$GPG_FILE" ] && grep -q "^-----BEGIN" "$GPG_FILE"; then
+            gpg --import "$GPG_FILE" 2>/dev/null || true
+          fi
+        done <<< "$RELEASERS"
+
+        # Write SSH allowed_signers for releaser keys
+        mkdir -p ~/.ssh
+        touch ~/.ssh/allowed_signers
+
+        while read -r username; do
+          SSH_FILE="$RELEASER_KEYS_DIR/${username}.ssh.txt"
+          if [ -f "$SSH_FILE" ]; then
+            grep -v '^#' "$SSH_FILE" | grep -v '^$' >> ~/.ssh/allowed_signers || true
+          fi
+        done <<< "$RELEASERS"
+
+        chmod 600 ~/.ssh/allowed_signers
+        git config --global gpg.ssh.allowedSignersFile ~/.ssh/allowed_signers
+
+    - name: Verify tag signature
+      shell: bash
+      working-directory: ${{ inputs.target-path }}
+      run: git tag -v "${{ inputs.tag }}"

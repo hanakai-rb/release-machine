@@ -1,0 +1,46 @@
+name: Update release history
+description: >-
+  Append a release entry to RELEASES.md in the release-machine repo and push the
+  commit. Assumes release-machine is checked out at the workspace root.
+
+inputs:
+  target-path:
+    description: Path where the target repo is checked out (used to look up the tagger email)
+    required: true
+  package-name:
+    description: Name of the package being released
+    required: true
+  tag:
+    description: Release tag (e.g., v1.0.0)
+    required: true
+  github-token:
+    description: Token used by add-release.sh to resolve the tagger's GitHub username
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        TARGET_PATH: ${{ inputs.target-path }}
+        PACKAGE_NAME: ${{ inputs.package-name }}
+        TAG: ${{ inputs.tag }}
+      run: |
+        # Extract tagger email from the release tag
+        pushd "$TARGET_PATH" > /dev/null
+        TAGGER_EMAIL=$(git for-each-ref --format='%(taggeremail)' "refs/tags/$TAG" | tr -d '<>')
+        if [ -z "$TAGGER_EMAIL" ]; then
+          TAGGER_EMAIL=$(git log -1 --pretty=format:'%ae' "$TAG")
+        fi
+        popd > /dev/null
+
+        # Add release entry
+        ./.github/scripts/add-release.sh "$PACKAGE_NAME" "$TAG" "$TAGGER_EMAIL"
+
+        # Commit and push
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add RELEASES.md
+        git commit -m "Add release: $PACKAGE_NAME $TAG"
+        git push

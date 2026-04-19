@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: add-release.sh <gem-name> <tag> <tagger-email>
+# Usage: add-release.sh <package-name> <tag> <tagger-email>
 #
 # Adds a release entry to RELEASES.md in the format:
-# - YYYY-MM-DD - gem-name vX.Y.Z by @username
+# - YYYY-MM-DD - package-name vX.Y.Z by @username
 #
 # Requires GITHUB_TOKEN environment variable for API access.
 
-GEM_NAME="${1:?Gem name required}"
+PACKAGE_NAME="${1:?Package name required}"
 TAG="${2:?Tag required}"
 TAGGER_EMAIL="${3:?Tagger email required}"
 GITHUB_TOKEN="${GITHUB_TOKEN:?GITHUB_TOKEN environment variable required}"
@@ -29,7 +29,7 @@ else
   DISPLAY_USER=$(echo "$TAGGER_EMAIL" | cut -d'@' -f1)
 fi
 
-NEW_ENTRY="- ${DATE} - ${GEM_NAME} ${TAG} by ${DISPLAY_USER}"
+NEW_ENTRY="- ${DATE} - ${PACKAGE_NAME} ${TAG} by ${DISPLAY_USER}"
 
 # Insert before first list item, or append if none exist
 if grep -q "^- " RELEASES.md; then
