@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-05-04 - hanami-assets v2.3.3 by @timriley
 - 2026-04-24 - dry-monads v1.10.0 by @timriley
 - 2026-04-18 - dry-testing v1.13.0 by @timriley
 - 2026-03-13 - dry-logger v1.2.2 by @timriley
