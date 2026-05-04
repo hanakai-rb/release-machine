@@ -21,7 +21,7 @@ on:
 jobs:
   release:
     permissions:
-      id-token: write # For npm trusted publishing and provenance attestations
+      id-token: write # For npm trusted publishing
       contents: write
       actions: write # For triggering announce workflow
 
@@ -77,7 +77,7 @@ jobs:
 
       - name: Publish package to npm
         working-directory: release-package
-        run: npm publish --provenance --access public
+        run: npm publish --access public --provenance=false
 
       - name: Wait for npm registry
         env:
