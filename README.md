@@ -18,7 +18,7 @@ Prerequisites:
 To release a gem:
 
 1. Prepare `lib/[gem_name]/version.rb` and `CHANGELOG.md` for the new version.
-2. Create a signed tag for the version: `git tag -s vX.Y.Z`
+2. Create a signed tag for the version: `git tag -s vX.Y.Z -m vX.Y.Z`
 3. Push the signed tag: `git push origin vX.Y.Z`
 4. Watch the latest [release workflow run][release-gem-workflow] to see the new version published.
 
@@ -42,7 +42,7 @@ Prerequisites:
 To release an npm package:
 
 1. Prepare `package.json` and `CHANGELOG.md` for the new version.
-2. Create a signed tag for the version: `git tag -s vX.Y.Z`
+2. Create a signed tag for the version: `git tag -s vX.Y.Z -m vX.Y.Z`
 3. Push the signed tag: `git push origin vX.Y.Z`
 4. Watch the latest [release workflow run][release-npm-workflow] to see the new version published.
 
