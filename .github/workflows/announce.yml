@@ -23,7 +23,7 @@ jobs:
     outputs:
       forum_url: ${{ steps.post.outputs.url }}
     env:
-      FORUM_URL: "https://discourse.hanamirb.org"
+      FORUM_URL: "https://discourse.hanakai.org"
       FORUM_CATEGORY_ID: "17"
     steps:
       - uses: actions/checkout@v6
