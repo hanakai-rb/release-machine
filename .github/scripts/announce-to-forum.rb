@@ -62,13 +62,16 @@ version = release_data["tag_name"].sub(/^v/, "")
 
 # Matches "(@username in #15)" parentheticals at the end of our release note bullets.
 CLOSING_PARENS_REGEXP = /
-  ^        # start of line
-  (-.*)    # capture: dash and everything up to the opening paren
-  \(       # opening paren
-  ([^)]+)  # capture: content inside parentheses
-  \)       # closing paren
-  [ \t]*   # match but don't capture trailing spaces or tabs (not newlines)
-  $        # end of line
+  ^               # start of line
+  (               # capture: line prefix up to opening paren
+    (?:-|[ \t]+)  # dash bullet OR continuation-line indent
+    .*
+  )
+  \(              # opening paren
+  ([^)]+)         # capture: content inside parentheses
+  \)              # closing paren
+  [ \t]*          # match but don't capture trailing spaces or tabs (not newlines)
+  $               # end of line
 /x
 
 # Matches "@username" mentions.
