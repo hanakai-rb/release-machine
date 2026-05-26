@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-05-26 - dry-auto_inject v1.2.1 by @flash-gordon
 - 2026-05-19 - dry-auto_inject v1.2.0 by @flash-gordon
 - 2026-05-14 - dry-configurable v1.4.0 by @cllns
 - 2026-05-04 - hanami-assets v2.3.3 by @timriley
