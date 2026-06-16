@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-06-16 - hanami-reloader v3.0.0.rc1 by @timriley
 - 2026-06-16 - hanami-webconsole v3.0.0.rc1 by @timriley
 - 2026-06-16 - hanami-rspec v3.0.0.rc1 by @timriley
 - 2026-06-16 - hanami-db v3.0.0.rc1 by @timriley
