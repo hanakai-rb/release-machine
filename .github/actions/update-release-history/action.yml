@@ -35,12 +35,38 @@ runs:
         fi
         popd > /dev/null
 
-        # Add release entry
-        ./.github/scripts/add-release.sh "$PACKAGE_NAME" "$TAG" "$TAGGER_EMAIL"
-
-        # Commit and push
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add RELEASES.md
-        git commit -m "Add release: $PACKAGE_NAME $TAG"
-        git push
+
+        # Concurrent releases push to main at the same time, so a plain push can be rejected when
+        # another run lands first. Re-apply the entry on top of the latest main and retry.
+        #
+        # Re-applying (rather than rebasing) avoids a merge conflict, since every entry is meant to
+        # go to the top of the same list.
+        MAX_ATTEMPTS=20
+        attempt=1
+        while true; do
+          git fetch origin main
+          git reset --hard origin/main
+
+          ./.github/scripts/add-release.sh "$PACKAGE_NAME" "$TAG" "$TAGGER_EMAIL"
+          git add RELEASES.md
+          git commit -m "Add release: $PACKAGE_NAME $TAG"
+
+          if git push origin HEAD:main; then
+            echo "Pushed release entry on attempt $attempt"
+            break
+          fi
+
+          if [ "$attempt" -ge "$MAX_ATTEMPTS" ]; then
+            echo "ERROR: Failed to push release entry after $MAX_ATTEMPTS attempts"
+            exit 1
+          fi
+
+          # Linear backoff with jitter to avoid a thundering herd of retries.
+          JITTER=$((RANDOM % 3))
+          SLEEP_TIME=$((attempt + JITTER))
+          echo "Push rejected (attempt $attempt/$MAX_ATTEMPTS); another release pushed concurrently. Retrying in ${SLEEP_TIME}s..."
+          sleep $SLEEP_TIME
+          attempt=$((attempt + 1))
+        done
