@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-07-01 - hanami-minitest v3.0.0 by @timriley
 - 2026-07-01 - hanami-rspec v3.0.0 by @timriley
 - 2026-07-01 - hanami-db v3.0.0 by @timriley
 - 2026-07-01 - hanami-assets v3.0.0 by @timriley
