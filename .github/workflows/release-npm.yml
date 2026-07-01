@@ -128,3 +128,4 @@ jobs:
           repo: ${{ github.event.inputs.repo }}
           tag: ${{ github.event.inputs.tag }}
           package-name: ${{ steps.package_name.outputs.package_name }}
+          label: npm
