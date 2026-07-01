@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Usage: announce-to-forum.rb <package-name> <repo> <tag>
+# Usage: announce-to-forum.rb <package-name> <repo> <tag> [label]
 #
 # Fetches a GitHub release and posts an announcement to Discourse forum.
 #
@@ -9,6 +9,8 @@
 #   package-name - Name of the package being released
 #   repo         - GitHub repository in owner/repo format
 #   tag          - Release tag (e.g., v1.0.0)
+#   label        - Optional label to include after the post title (e.g. "npm"),
+#                  rendered as "package-name version (label) released"
 #
 # Required environment variables:
 #   FORUM_URL         - Discourse forum URL
@@ -29,6 +31,7 @@ require "json"
 package_name = ARGV[0] or abort "ERROR: Package name required"
 repo = ARGV[1] or abort "ERROR: Repository required (format: owner/repo)"
 tag = ARGV[2] or abort "ERROR: Release tag required"
+label = ARGV[3].to_s.strip # Optional; empty when omitted
 
 owner, repo_name = repo.split("/")
 abort "ERROR: Invalid repository format. Expected owner/repo" unless owner && repo_name
@@ -104,7 +107,9 @@ release_body.gsub!(CLOSING_PARENS_REGEXP) do
 end
 
 # Prepare forum post
-title = "#{package_name} #{version} released"
+title = "#{package_name} #{version}"
+title += " (#{label})" unless label.empty?
+title += " released"
 
 body = release_body.strip
 body += "\n\n---\n\n"

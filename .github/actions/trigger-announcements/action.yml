@@ -11,6 +11,10 @@ inputs:
   package-name:
     description: Package name
     required: true
+  label:
+    description: Optional label to include after the post title (e.g. "npm")
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -26,6 +30,7 @@ runs:
             inputs: {
               repo: "${{ inputs.repo }}",
               tag: "${{ inputs.tag }}",
-              package_name: "${{ inputs.package-name }}"
+              package_name: "${{ inputs.package-name }}",
+              label: "${{ inputs.label }}"
             }
           });

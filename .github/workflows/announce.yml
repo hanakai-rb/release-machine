@@ -16,6 +16,11 @@ on:
         description: "Package name"
         required: true
         type: string
+      label:
+        description: 'Optional label to include after the post title (e.g. "npm")'
+        required: false
+        type: string
+        default: ""
 
 jobs:
   forum:
@@ -38,16 +43,17 @@ jobs:
           FORUM_API_KEY: ${{ secrets.FORUM_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          OUTPUT=$(
-            ruby .github/scripts/announce-to-forum.rb \
+          # Set pipefail so a non-zero exit from the script fails the step. Use tee so the script's
+          # output (including error details) is visible in the log.
+          set -o pipefail
+          ruby .github/scripts/announce-to-forum.rb \
             "${{ github.event.inputs.package_name }}" \
             "${{ github.event.inputs.repo }}" \
-            "${{ github.event.inputs.tag }}"
-          )
-          echo "$OUTPUT"
+            "${{ github.event.inputs.tag }}" \
+            "${{ github.event.inputs.label }}" | tee output.txt
 
-          POST_URL=$(echo "$OUTPUT" | grep -oE 'https://discourse[^ ]+')
-          echo "url=$POST_URL" >> $GITHUB_OUTPUT
+          POST_URL=$(grep -oE 'https://discourse[^ ]+' output.txt || true)
+          echo "url=$POST_URL" >> "$GITHUB_OUTPUT"
 
   announcements:
     needs: forum
