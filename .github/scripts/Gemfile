@@ -1,0 +1,8 @@
+# Dependencies for the scripts' specs only.
+#
+# The scripts themselves declare their runtime gems inline (see `bundler/inline` in each script), so
+# they stay self-contained and runnable without a bundle.
+
+source "https://gem.coop"
+
+gem "rspec"
