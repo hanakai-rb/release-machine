@@ -2,10 +2,12 @@ name: Test
 
 on:
   push:
+    branches: ["main", "ci/*"]
     paths:
       - ".github/scripts/**"
       - ".github/workflows/test.yml"
   pull_request:
+    branches: ["main"]
     paths:
       - ".github/scripts/**"
       - ".github/workflows/test.yml"
