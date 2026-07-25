@@ -22,11 +22,6 @@
 #   FORUM_API_KEY     - Discourse API key
 #   GITHUB_TOKEN      - GitHub token (optional for public repos)
 #
-# Optional environment variables:
-#   DRY_RUN           - When set, print the topic and post that would be created, and exit without
-#                       writing to the forum. The forum env vars above become optional; without
-#                       them, the topic lookup is skipped.
-#
 # Run `bundle exec rspec` in `.github/scripts` to test this script.
 
 require "json"
@@ -274,22 +269,6 @@ def post_announcement(
   forum.reply_to_topic(topic["id"], body)
 end
 
-# Prints what would be posted. `forum` is nil when the forum env vars aren't set.
-def print_dry_run(title, body, forum)
-  puts "DRY RUN: nothing will be posted"
-  puts "Topic: #{title}"
-
-  if forum
-    existing = forum.find_topics(title).first
-    puts(existing ? "Action: reply to #{forum.topic_url(existing["id"])}" : "Action: create topic")
-  else
-    puts "Action: unknown (set FORUM_URL, FORUM_CATEGORY_ID and FORUM_API_KEY to check for an existing topic)"
-  end
-
-  puts "Post:"
-  puts body
-end
-
 # Runs the script only when invoked directly.
 #
 # This allows specs to load and test specific behavior without running the whole script.
@@ -310,26 +289,17 @@ if __FILE__ == $PROGRAM_NAME
   owner, repo_name = repo.split("/")
   abort "ERROR: Invalid repository format. Expected owner/repo" unless owner && repo_name
 
-  dry_run = !ENV["DRY_RUN"].to_s.empty?
   forum_url = ENV["FORUM_URL"]
   forum_category_id = ENV["FORUM_CATEGORY_ID"]
   forum_api_key = ENV["FORUM_API_KEY"]
   github_token = ENV["GITHUB_TOKEN"] # Optional
 
   # Unset secrets and env vars arrive as empty strings, so treat blank as missing.
-  forum_configured = [forum_url, forum_category_id, forum_api_key].none? { _1.to_s.strip.empty? }
+  abort "ERROR: FORUM_URL env var required" if forum_url.to_s.strip.empty?
+  abort "ERROR: FORUM_CATEGORY_ID env var required" if forum_category_id.to_s.strip.empty?
+  abort "ERROR: FORUM_API_KEY secret required" if forum_api_key.to_s.strip.empty?
 
-  unless dry_run || forum_configured
-    abort "ERROR: FORUM_URL env var required" if forum_url.to_s.strip.empty?
-    abort "ERROR: FORUM_CATEGORY_ID env var required" if forum_category_id.to_s.strip.empty?
-    abort "ERROR: FORUM_API_KEY secret required" if forum_api_key.to_s.strip.empty?
-  end
-
-  # Only ever nil during a dry run.
-  forum =
-    if forum_configured
-      Forum.new(url: forum_url, category_id: forum_category_id, api_key: forum_api_key)
-    end
+  forum = Forum.new(url: forum_url, category_id: forum_category_id, api_key: forum_api_key)
 
   # Fetch release from GitHub
   github_response = HTTP
@@ -354,11 +324,6 @@ if __FILE__ == $PROGRAM_NAME
     notes: linkify_release_notes(release["body"].to_s, owner, repo_name),
     release_url: release["html_url"]
   )
-
-  if dry_run
-    print_dry_run(title, body, forum)
-    exit 0
-  end
 
   # Post to Discourse, in the topic for this release series
   puts "Posted to Discourse: #{post_announcement(forum, title, body)}"
