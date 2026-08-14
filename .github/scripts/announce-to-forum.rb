@@ -140,7 +140,7 @@ class Forum
     page = 0
 
     while page < MAX_TOPIC_PAGES
-      response = http.get("#{url}/c/#{category_slug}/#{category_id}.json?page=#{page}")
+      response = http.get("#{url}/latest.json?category=#{category_id}&no_subcategories=true&page=#{page}")
       abort_on_error response, "listing topics in category #{category_id}"
 
       topic_list = response.parse["topic_list"]
@@ -192,14 +192,6 @@ class Forum
 
   def http
     HTTP.headers("Content-Type" => "application/json", "Api-Key" => api_key)
-  end
-
-  def category_slug
-    @category_slug ||= begin
-      response = http.get("#{url}/c/#{category_id}/show.json")
-      abort_on_error response, "looking up category #{category_id}"
-      response.parse.dig("category", "slug")
-    end
   end
 
   def duplicate_title?(response)
