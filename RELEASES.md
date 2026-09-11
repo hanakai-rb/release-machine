@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-09-11 - dry-monads v1.11.0 by @timriley
 - 2026-08-21 - hanami v3.0.2 by @timriley
 - 2026-08-21 - hanami-view v3.0.2 by @timriley
 - 2026-08-14 - hanami-view v3.0.1 by @timriley
