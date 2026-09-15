@@ -12,4 +12,6 @@ default:
 # Package releasers can release specific packages.
 #
 # Entries here are added to the default releasers.
-packages: {}
+packages:
+  dry-rails:
+    - alassek
