@@ -15,3 +15,7 @@ default:
 packages:
   dry-rails:
     - alassek
+  rom-factory:
+    - alassek
+  rom-rails:
+    - alassek
