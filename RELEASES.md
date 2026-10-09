@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-10-09 - rom-factory v0.14.1 by @alassek
 - 2026-10-03 - rom-factory v0.14.0 by @timriley
 - 2026-09-15 - dry-rails v0.8.0 by @alassek
 - 2026-09-11 - dry-monads v1.11.0 by @timriley
