@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-11-18 - dry-auto_inject v1.2.2 by @timriley
 - 2026-11-18 - dry-logger v1.3.0 by @timriley
 - 2026-10-09 - rom-factory v0.14.1 by @alassek
 - 2026-10-03 - rom-factory v0.14.0 by @timriley
