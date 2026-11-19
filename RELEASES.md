@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-11-19 - dry-files v1.2.0 by @timriley
 - 2026-11-19 - dry-cli v2.0.0.rc1 by @timriley
 - 2026-11-18 - dry-monads v1.11.1 by @timriley
 - 2026-11-18 - dry-types v1.9.2 by @timriley
