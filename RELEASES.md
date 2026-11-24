@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-11-24 - hanami-action v3.0.3 by @timriley
 - 2026-11-24 - hanami-webconsole v3.0.1 by @timriley
 - 2026-11-24 - hanami-view v3.0.3 by @timriley
 - 2026-11-24 - hanami-action v3.0.2 by @timriley
