@@ -76,7 +76,22 @@ jobs:
 
       - name: Publish package to npm
         working-directory: release-package
-        run: npm publish --access public --provenance=false
+        env:
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          # npm requires an explicit dist-tag when publishing a prerelease version.
+          #
+          # In semver, a hyphen after the main version marks a prerelease (e.g.
+          # v3.1.0-rc.1, v4.0.0-beta.2). Publish all prereleases under the single
+          # "next" dist-tag, so `npm install <pkg>@next` gets the newest one.
+          #
+          # Stable versions (e.g. v3.1.0) have no hyphen. Publish these without
+          # --tag, so npm uses its default "latest" dist-tag.
+          if [[ "$TAG" == *-* ]]; then
+            npm publish --access public --provenance=false --tag next
+          else
+            npm publish --access public --provenance=false
+          fi
 
       - name: Wait for npm registry
         env:
