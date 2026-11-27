@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-11-27 - hanami-assets v3.1.0.rc1 by @timriley
 - 2026-11-27 - hanami-mailer v3.1.0.rc1 by @timriley
 - 2026-11-27 - hanami-action v3.1.0.rc1 by @timriley
 - 2026-11-27 - hanami-view v3.1.0.rc1 by @timriley
