@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-11-27 - hanami-view v3.1.0.rc1 by @timriley
 - 2026-11-27 - hanami-utils v3.1.0.rc1 by @timriley
 - 2026-11-27 - hanami-router v3.1.0.rc1 by @timriley
 - 2026-11-27 - dry-system v1.3.0 by @timriley
