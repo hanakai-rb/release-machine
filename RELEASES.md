@@ -2,6 +2,7 @@
 
 A history of releases made by Release Machine.
 
+- 2026-11-27 - hanami v3.1.0.rc1 by @timriley
 - 2026-11-27 - hanami-assets v3.1.0-rc.1 by @timriley
 - 2026-11-27 - hanami-cli v3.1.0.rc1 by @timriley
 - 2026-11-27 - hanami-reloader v3.1.0.rc1 by @timriley
